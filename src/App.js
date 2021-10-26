@@ -1,71 +1,60 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import shortid from "shortid";
 import "./App.css";
 
+import ContactForm from "./components/ContactForm";
+import ContactList from "./components/ContactList";
+import Filter from "./components/Filter";
+
+import filter from "./helpers/filter";
+
 class App extends Component {
   state = {
-    contacts: [],
-    name: "",
-    number: "",
+    contacts: [
+      { id: "id-1", name: "Rosie Simpson", number: "459-12-56" },
+      { id: "id-2", name: "Hermione Kline", number: "443-89-12" },
+      { id: "id-3", name: "Eden Clements", number: "645-17-79" },
+      { id: "id-4", name: "Annie Copeland", number: "227-91-26" },
+    ],
+    filter: "",
   };
 
-  hendleChange = (e) => {
-    const { name, value } = e.currentTarget;
+  handlelAddContact = (contact) => {
+    this.state.contacts.some((userName) => userName.name === contact.name)
+      ? alert("Пользователь с таким именем уже добавлен")
+      : this.setState((prevstate) => ({
+          contacts: [
+            ...prevstate.contacts,
+            { id: shortid.generate(), ...contact },
+          ],
+        }));
+  };
 
+  deliteContact = (id) => {
     this.setState({
-      [name]: value,
+      contacts: this.state.contacts.filter((contact) => contact.id !== id),
     });
   };
 
-  hendleSumbit = (e) => {
-    e.preventDefault();
-    console.log(this.state);
-
-    this.reset();
-  };
-
-  reset = () => {
+  handelChangeFilter = (e) => {
     this.setState({
-      name: "",
-      number: "",
+      filter: e.currentTarget.value,
     });
   };
-
-  NameInputId = shortid.generate();
-  NumberInputId = shortid.generate();
 
   render() {
     return (
-      <form onSubmit={this.hendleSumbit}>
-        <label htmlFor={this.NameInputId}>
-          Name
-          <input
-            id={this.NameInputId}
-            type="text"
-            name="name"
-            pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-            title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
-            required
-            onChange={this.hendleChange}
-            value={this.state.name}
-          />
-        </label>
-        <label htmlFor={this.NumberInputId}>
-          Number
-          <input
-            id={this.NumberInputId}
-            type="tel"
-            name="number"
-            pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-            title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
-            required
-            onChange={this.hendleChange}
-            value={this.state.number}
-          />
-        </label>
-
-        <button type="submit">Add contact</button>
-      </form>
+      <div className="App">
+        <ContactForm handlelAddContact={this.handlelAddContact} />
+        <Filter
+          filter={this.state.filter}
+          handelChangeFilter={this.handelChangeFilter}
+        />
+        <ContactList
+          contacts={filter(this.state.contacts, this.state.filter)}
+          deliteContact={this.deliteContact}
+        />
+      </div>
     );
   }
 }
